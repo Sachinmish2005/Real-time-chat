@@ -7,9 +7,11 @@ import { useSelector } from 'react-redux'
 import Profile from './pages/Profile.jsx'
 import getCuurentUser from './customHooks/getCurrentUser.jsx'
 import Home from './pages/Home.jsx'
+import getOtherUsers from './customHooks/getOtherUsers.jsx'
 
 function App() {
     getCuurentUser()
+    getOtherUsers()
     let {userData}=useSelector(state=>state.user)
   return (
  <Routes>

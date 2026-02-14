@@ -35,6 +35,8 @@ function Profile() {
       let result=await axios.put(`${serverUrl}/api/user/profile`,formData,{withCredentials:true})
       setSaving(false)
       dispatch(setUserData(result.data))
+      
+      navigate("/")
     } catch (error) {
       console.log(error)
       setSaving(false)
@@ -42,7 +44,7 @@ function Profile() {
   }
   return (
     <div className='w-full h-[100vh] bg-slate-200 flex flex-col justify-center items-center gap-[20px]'>
-      <div className='fixed top-[20px] left-[20px] '>
+      <div className='fixed cursor-pointer top-[20px] left-[20px] '>
         <FaArrowLeft className='w-[30px] h-[30px] text-gray-600 cursor-pointer' onClick={()=>navigate("/")} />
       </div>
       <div className=' bg-white border-2  rounded-full border-[#20c7ff] shadow-gray-400 shadow-lg  relative' onClick={()=>image.current.click()}>
