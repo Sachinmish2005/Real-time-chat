@@ -3,6 +3,8 @@ import dp from '../assets/dp.jpg'
 import { RiEmojiStickerLine } from "react-icons/ri";
 import { IoSend } from "react-icons/io5";
 import EmojiPicker from 'emoji-picker-react';
+import { useEffect } from "react";
+
 import { PiImagesFill } from "react-icons/pi";
 import { FaArrowLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,16 +13,19 @@ import SenderMessage from './SenderMessage';
 import ReceiverMessage from './ReceiverMessage';
 import { serverUrl } from '../main';
 import axios from 'axios';
+import { setMessages } from '../redux/messageSlice';
 
 function MessageArea() {
+  
 
-  let { selectedUser } = useSelector(state => state.user)
+  let { selectedUser ,userData,socket} = useSelector(state => state.user)
   let [showPicker, setShowPicker] = useState(false)
   let dispatch = useDispatch()
   let [input, setInput] = useState("")
   let [frontendImage , setFrontendImage]=useState(null)
   let [backendImage , setBackendImage]=useState(null)
   let image=useRef()
+  let {messages}=useSelector(state=>state.message)
   const handleImage =(e)=>{
     let file= e.target.files[0]
     setBackendImage(file)
@@ -35,7 +40,7 @@ function MessageArea() {
         formData.append("image",backendImage)
       }
       let result = await axios.post(`${serverUrl}/api/message/send/${selectedUser._id}`,formData,{withCredentials:true})
-      console.log(result.data)
+        dispatch(setMessages([...messages,result.data]))
       setInput('')
       setFrontendImage(null)
       setBackendImage(null)
@@ -43,6 +48,33 @@ function MessageArea() {
       console.log(error)
     }
   }
+useEffect(() => {
+
+  if (!selectedUser?._id) return;
+
+  const fetchMessages = async () => {
+    try {
+      const res = await axios.get(
+        `${serverUrl}/api/message/get/${selectedUser._id}`,
+        { withCredentials: true }
+      );
+
+      dispatch(setMessages(res.data));
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  fetchMessages(); // first load
+
+  
+  
+  
+
+}, [selectedUser?._id]);
+
+
 
   const onEmojiClick = (emojiData) => {
     setInput(prev => prev + emojiData.emoji)
@@ -62,7 +94,7 @@ function MessageArea() {
         <div className='w-full h-[100px] bg-[#33d9c6]
         rounded-b-[30px] shadow-lg flex items-center px-[20px] gap-[25px]'>
 
-          <div className='cursor-pointer lg:hidden'>
+          <div className='cursor-pointer '>
             <FaArrowLeft
               className='w-[30px] h-[30px] text-white'
               onClick={() => dispatch(setSelectedUser(null))}
@@ -83,18 +115,27 @@ function MessageArea() {
       {/* MESSAGES AREA */}
 
       {selectedUser &&
-        <div className='flex-1 overflow-y-auto px-[20px] py-[30px] flex flex-col gap-2 relative'>
+        <div className='flex-1 overflow-y-auto px-[20px] py-[30px] flex flex-col gap-[20px] relative'>
 
           {showPicker &&
             <div className='absolute bottom-[90px] left-[20px] z-50'>
               <EmojiPicker width={250} height={350} onEmojiClick={onEmojiClick} />
             </div>
           }
+          {messages?.map((mess) => (
+  <div key={mess._id}>
+    {mess.sender?.toString() === userData?._id?.toString()
+      ? (
+        <SenderMessage image={mess.image} message={mess.message} />
+      ) : (
+        <ReceiverMessage image={mess.image} message={mess.message} />
+      )
+    }
+  </div>
+))}
 
-          <SenderMessage />
-          <ReceiverMessage />
-          <SenderMessage />
-          <ReceiverMessage />
+
+          
 
         </div>
       }

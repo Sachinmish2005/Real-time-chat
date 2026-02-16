@@ -1,6 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import {io, getReceiverSocketId } from "../socket/socket.js";
 
 export const sendMessage=async (req,res)=>{
   try {
@@ -21,13 +22,21 @@ export const sendMessage=async (req,res)=>{
     if(!conversation){
       conversation=await Conversation.create({
         participants:[sender,receiver],
-        messages:[newMessage._is]
+        messages:[newMessage._id]
       })
 
     }else{
-      conversation.message.push(newMessage._id)
+      conversation.messages.push(newMessage._id)
       await conversation.save()
     }
+
+    const receiverSockedId=getReceiverSocketId(receiver)
+    if(receiverSockedId){
+      io.to(receiverSockedId).emit("newMessage",newMessage)
+    }
+
+
+
     return res.status(201).json(newMessage)
 
   } catch (error) {
@@ -37,20 +46,28 @@ export const sendMessage=async (req,res)=>{
 
 
 
-export const getMessages=async (req,res)=>{
-  try{
-     let sender = req.userId
-    let {receiver}= req.params
+export const getMessages = async (req, res) => {
+  try {
+    let sender = req.userId;
+    let { receiver } = req.params;
+
+    
+
     let conversation = await Conversation.findOne({
-      participants:{$all:[sender,receiver]}
-    }).populate("message")
-    if(!conversation){
-      return res.status(400).json
-      ({message:"conversation not found"})
+      participants: { $all: [sender, receiver] }
+    }).populate("messages");
+
+ 
+
+    if (!conversation) {
+      return res.status(200).json([]);
     }
 
-    return res.status(200).json(conversation?.messages)
-  }catch(error){
-    return res.status(500).json({message:`get Message error ${error}`})
+    return res.status(200).json(conversation.messages);
+
+  } catch (error) {
+    return res.status(500).json({
+      message: `get Message error ${error}`
+    });
   }
-}
+};
