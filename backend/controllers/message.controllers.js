@@ -30,9 +30,9 @@ export const sendMessage=async (req,res)=>{
       await conversation.save()
     }
 
-    const receiverSockedId=getReceiverSocketId(receiver)
-    if(receiverSockedId){
-      io.to(receiverSockedId).emit("newMessage",newMessage)
+    const receiverSocketId=getReceiverSocketId(receiver)
+    if(receiverSocketId){
+      io.to(receiverSocketId).emit("newMessage",newMessage)
     }
 
 

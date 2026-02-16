@@ -67,17 +67,20 @@ useEffect(() => {
   };
 
   fetchMessages(); // first load
-
-  
-  
-  
-
 }, [selectedUser?._id]);
 
+useEffect(()=>{
+  socket.on("newMessage",(mess)=>{
+    dispatch(setMessages([...messages,mess]))
+
+  })
+  return ()=>socket.off("newMessage")
+    
+},[messages,setMessages])
 
 
   const onEmojiClick = (emojiData) => {
-    setInput(prev => prev + emojiData.emoji)
+    setInput(prevInput => prevInput + emojiData.emoji)
     setShowPicker(false)
   }
 
