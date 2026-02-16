@@ -1,38 +1,149 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import dp from '../assets/dp.jpg'
+import { RiEmojiStickerLine } from "react-icons/ri";
+import { IoSend } from "react-icons/io5";
+import EmojiPicker from 'emoji-picker-react';
+import { PiImagesFill } from "react-icons/pi";
 import { FaArrowLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedUser } from '../redux/userSlice';
+import SenderMessage from './SenderMessage';
+import ReceiverMessage from './ReceiverMessage';
+import { serverUrl } from '../main';
+import axios from 'axios';
+
 function MessageArea() {
 
   let { selectedUser } = useSelector(state => state.user)
+  let [showPicker, setShowPicker] = useState(false)
   let dispatch = useDispatch()
+  let [input, setInput] = useState("")
+  let [frontendImage , setFrontendImage]=useState(null)
+  let [backendImage , setBackendImage]=useState(null)
+  let image=useRef()
+  const handleImage =(e)=>{
+    let file= e.target.files[0]
+    setBackendImage(file)
+    setFrontendImage(URL.createObjectURL(file))
+  }
+  const handleSendMessage=async (e)=>{
+    e.preventDefault()
+    try {
+      let formData = new FormData()
+      formData.append("message",input)
+      if(backendImage){
+        formData.append("image",backendImage)
+      }
+      let result = await axios.post(`${serverUrl}/api/message/send/${selectedUser._id}`,formData,{withCredentials:true})
+      console.log(result.data)
+      setInput('')
+      setFrontendImage(null)
+      setBackendImage(null)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const onEmojiClick = (emojiData) => {
+    setInput(prev => prev + emojiData.emoji)
+    setShowPicker(false)
+  }
+
+
+
   return (
 
-    <div className={`lg:w-[70%] lg-flex${!selectedUser ? "flex" : "hidden"} lg:flex h-full w-full bg-slate-400`}>
-      {selectedUser && <div className='w-full h-[100px] bg-[#33d9c6]
-        rounded-b-[30px] shadow-gray-400 shadow-lg flex   items-center px-[20px] gap-[25px]'>
+    <div className={`lg:w-[70%] ${selectedUser ? "flex" : "hidden"} lg:flex 
+    h-full w-full bg-slate-400 border-l-2 border-gray-300 flex-col`}>
 
-        <div className='cursor-pointer '>
-          <FaArrowLeft className='w-[30px] h-[30px] text-gray-600 text-white' onClick={() => dispatch(setSelectedUser(null))} />
+      {/* HEADER */}
+
+      {selectedUser &&
+        <div className='w-full h-[100px] bg-[#33d9c6]
+        rounded-b-[30px] shadow-lg flex items-center px-[20px] gap-[25px]'>
+
+          <div className='cursor-pointer lg:hidden'>
+            <FaArrowLeft
+              className='w-[30px] h-[30px] text-white'
+              onClick={() => dispatch(setSelectedUser(null))}
+            />
+          </div>
+
+          <div className='w-[60px] h-[60px] rounded-full overflow-hidden bg-white shadow-lg'>
+            <img src={selectedUser?.image || dp} className='h-full w-full object-cover' />
+          </div>
+
+          <h1 className='text-white font-semibold text-[20px]'>
+            {selectedUser?.name}
+          </h1>
+
         </div>
-        <div className='w-[60px] h-[60px]  rounded-full overflow-hidden flex justify-center items-center shadow-gray-500 bg-white shadow-lg cursor-pointer'>
+      }
 
-          <img src={selectedUser?.image || dp} alt="" className='h-[100%]' />
+      {/* MESSAGES AREA */}
+
+      {selectedUser &&
+        <div className='flex-1 overflow-y-auto px-[20px] py-[30px] flex flex-col gap-2 relative'>
+
+          {showPicker &&
+            <div className='absolute bottom-[90px] left-[20px] z-50'>
+              <EmojiPicker width={250} height={350} onEmojiClick={onEmojiClick} />
+            </div>
+          }
+
+          <SenderMessage />
+          <ReceiverMessage />
+          <SenderMessage />
+          <ReceiverMessage />
+
         </div>
-        <h1 className='text-white font-semibold text-[20px]'>{selectedUser?.name || "user"}</h1>
+      }
 
+      {/* INPUT AREA */}
 
-      </div>}
+      {selectedUser &&
+        <div className='w-full flex items-center justify-center p-[15px]'>
+          <img src={frontendImage} alt='' className='w-[180px] absolute bottom-[100px] right-[10%] rounded-lg shadow-gray-400 shadow-lg'/>
+
+          <form className='w-[95%] lg:w-[80%] h-[60px] bg-[#33d9c6] rounded-full shadow-lg 
+          flex items-center gap-[20px] px-[20px]' onSubmit={handleSendMessage}>
+
+            <div onClick={() => setShowPicker(prev => !prev)}>
+              <RiEmojiStickerLine className='w-[25px] h-[25px] text-white cursor-pointer' />
+            </div>
+            <input type='file' accept='image/*' ref={image} hidden onChange={handleImage}/>
+
+            <input
+              type="text"
+              className='w-full h-full px-[10px] outline-none text-[19px] text-white bg-transparent placeholder-white'
+              placeholder='Message'
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <div onClick={()=>image.current.click()}>
+
+            <PiImagesFill className='w-[25px] h-[25px] text-white cursor-pointer' />
+            </div>
+            <button>
+
+            <IoSend className='w-[25px] h-[25px] text-white cursor-pointer' />
+            </button>
+
+          </form>
+
+        </div>
+      }
+
+      {/* WELCOME SCREEN */}
+
       {!selectedUser &&
         <div className='w-full h-full flex flex-col justify-center items-center'>
           <h1 className='font-bold text-gray-700 text-[50px]'>Welcome to chatly</h1>
           <span className='text-gray-700 font-semibold text-[30px]'>Chat Friendly...</span>
-        </div>}
+        </div>
+      }
 
-
-
-    </div >
+    </div>
   )
 }
 
