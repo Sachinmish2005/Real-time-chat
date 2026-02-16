@@ -33,6 +33,10 @@ function MessageArea() {
   }
   const handleSendMessage=async (e)=>{
     e.preventDefault()
+
+    if(input.length==0 && backendImage==null){
+      return null
+    }
     try {
       let formData = new FormData()
       formData.append("message",input)
@@ -168,10 +172,11 @@ useEffect(()=>{
 
             <PiImagesFill className='w-[25px] h-[25px] text-white cursor-pointer' />
             </div>
-            <button>
+          {input.length>0 || backendImage!=null && (<button>
 
             <IoSend className='w-[25px] h-[25px] text-white cursor-pointer' />
-            </button>
+            </button>)}
+            
 
           </form>
 
