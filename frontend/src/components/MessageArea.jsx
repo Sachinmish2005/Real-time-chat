@@ -122,7 +122,7 @@ useEffect(()=>{
       {/* MESSAGES AREA */}
 
       {selectedUser &&
-        <div className='flex-1 overflow-y-auto px-[20px] py-[30px] flex flex-col gap-[20px] relative'>
+        <div className=' w-full h-[70vh] flex flex-col overflow-y-auto px-[20px] py-[50px]  gap-[20px] '>
 
           {showPicker &&
             <div className='absolute bottom-[90px] left-[20px] z-50'>

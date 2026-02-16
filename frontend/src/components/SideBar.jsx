@@ -12,7 +12,7 @@ import { setOtherUsers, setSelectedUser, setUserData } from '../redux/userSlice'
 
 function SideBar() {
   let [search, setSearch] = useState(false)
-  let { userData, otherUsers,selectedUser } = useSelector(state => state.user)
+  let { userData, otherUsers,selectedUser,onlineUsers } = useSelector(state => state.user)
   let dispatch = useDispatch()
   let navigate = useNavigate()
   const handleLogOut = async () => {
@@ -26,7 +26,7 @@ function SideBar() {
     }
   }
   return (
-    <div className={`lg:w-[30%]  w-full h-full lg:block ${!selectedUser ? "block" : "hidden"} bg-slate-200`}>
+    <div className={`lg:w-[30%]  w-full h-full overflow-hidden lg:block ${!selectedUser ? "block" : "hidden"} bg-slate-200`}>
       <div className='w-[60px] h-[60px]  rounded-full overflow-hidden flex justify-center bg-[#20c7bb] items-center shadow-gray-500 mt-[10px] shadow-lg fixed bottom-[20px] left-[10px]' onClick={handleLogOut}>
 
         <BiLogOut className='h-[25px] w-[25px]' />
@@ -41,7 +41,7 @@ function SideBar() {
             <img src={userData.image || dp} alt="" className='h-[100%]' onClick={() => navigate("/profile")} />
           </div>
         </div>
-        <div className='w-full flex items-center gap-[20px]'>
+        <div className='w-full flex items-center gap-[20px] overflow-y-auto py-[10px]'>
           {!search && <div className='w-[60px] h-[60px]  rounded-full overflow-hidden flex justify-center bg-white items-center shadow-gray-500 mt-[10px] shadow-lg' onClick={() => setSearch(true)}>
             <IoSearchSharp className='h-[25px] w-[25px]' />
 
@@ -57,19 +57,27 @@ function SideBar() {
             </form>
           }
           {!search && otherUsers?.map((user) => (
-            <div className='w-[60px] h-[60px]  rounded-full mt[10px] overflow-hidden flex bg-white justify-center items-center shadow-gray-500 shadow-lg'>
+            onlineUsers?.includes(user._id) &&
+            <div className='relative  rounded-full mt-[10px] flex bg-white justify-center cursor-pointer items-center shadow-gray-500 shadow-lg' onClick={() => dispatch(setSelectedUser(user))}>
+            <div className='w-[60px] h-[60px]  rounded-full overflow-hidden flex  justify-center items-center '>
               <img src={user.image || dp} alt="" className='h-[100%]' />
+            </div>
+            <span className='w-[12px] h-[12px] rounded-full absolute bottom-[6px] right-[-1px] bg-[#3aff20] shadow-gray-500 shadow-md'></span>
             </div>
 
           ))}
         </div>
 
       </div>
-      <div className='w-full h-[60vh] overflow-auto flex flex-col gap-[20px] items-center mt-[20px]'>
+      <div className='w-full h-[50%] overflow-auto flex flex-col gap-[20px] items-center mt-[20px]'>
         {otherUsers?.map((user) => (
           <div className='w-[95%] h-[60px] flex  items-center gap-[20px] shadow-gray-500 bg-white shadow-lg rounded-full hover:bg-[#b2ccdf] cursor-pointer' onClick={() => dispatch(setSelectedUser(user))}>
-            <div className='w-[60px] h-[60px]  rounded-full  overflow-hidden flex bg-white justify-center items-center shadow-gray-500 shadow-lg'>
+            <div className='relative  rounded-full mt-[10px] flex bg-white justify-center items-center shadow-gray-500 shadow-lg' >
+            <div className='w-[60px] h-[60px]  rounded-full overflow-hidden flex  justify-center items-center '>
               <img src={user.image || dp} alt="" className='h-[100%]' />
+            </div>
+           { onlineUsers?.includes(user._id) &&
+            <span className='w-[12px] h-[12px] rounded-full absolute bottom-[6px] right-[-1px] bg-[#3aff20] shadow-gray-500 shadow-md'></span>}
             </div>
             <h1 className='text-gray-800 font-semibold text-[20px]'>{user.name || user.userName}</h1>
           </div>
