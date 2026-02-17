@@ -14,7 +14,7 @@ const port=process.env.PORT || 8000;
 
 
 app.use(cors({
-  origin:"http://localhost:5173",
+  origin:"https://chatly-az01.onrender.com",
   credentials:true
 }))
 app.use(express.json())
