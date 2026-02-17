@@ -17,7 +17,20 @@ receiver:{
 image:{
   type:String,
   default:""
-}
+},
+isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    deletedFor: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ]
+
+
 },{timestamps:true}
 )
 
