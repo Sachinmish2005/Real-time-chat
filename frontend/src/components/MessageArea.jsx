@@ -172,10 +172,10 @@ useEffect(()=>{
 
             <PiImagesFill className='w-[25px] h-[25px] text-white cursor-pointer' />
             </div>
-          {input.length>0 || backendImage!=null && (<button>
+         <button>
 
             <IoSend className='w-[25px] h-[25px] text-white cursor-pointer' />
-            </button>)}
+            </button>
             
 
           </form>

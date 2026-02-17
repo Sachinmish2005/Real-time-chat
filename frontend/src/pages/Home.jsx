@@ -2,7 +2,7 @@ import React from 'react'
 import SideBar from '../components/SideBar'
 import MessageArea from '../components/MessageArea'
 import { useSelector } from 'react-redux'
-import getMessages from '../customHooks/getMessages'
+import getMessages from '../customHooks/getMessages.jsx'
 
 function Home() {
   let {selectedUser}=useSelector(state=>state.user)
